@@ -9,6 +9,8 @@ import {
   Calendar,
   TrendingDown,
   RefreshCw,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 
 interface DashboardData {
@@ -36,24 +38,52 @@ interface Asset {
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [updating, setUpdating] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      setError("");
       const response = await fetch("/api/dashboard?userId=1");
+      const result = await response.json();
+      if (result.success) setData(result.data);
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePrices = async () => {
+    try {
+      setUpdating(true);
+      setUpdateMessage(null);
+
+      const response = await fetch("/api/update-prices?userId=1", {
+        method: "POST",
+      });
+
       const result = await response.json();
 
       if (result.success) {
-        setData(result.data);
+        setUpdateMessage({ type: "success", text: result.message });
+        // Refresh dashboard data with new prices
+        await fetchDashboard();
       } else {
-        setError("Erro ao carregar dados");
+        setUpdateMessage({
+          type: "error",
+          text: result.error || "Erro ao atualizar",
+        });
       }
     } catch (err) {
-      setError("Erro de conexão");
+      setUpdateMessage({ type: "error", text: "Erro de conexão" });
     } finally {
-      setLoading(false);
+      setUpdating(false);
+      // Hide message after 4 seconds
+      setTimeout(() => setUpdateMessage(null), 4000);
     }
   };
 
@@ -121,9 +151,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Title + Refresh */}
+        {/* Title + Update Button */}
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
@@ -131,26 +160,40 @@ export default function Home() {
               Visão geral da sua carteira de investimentos
             </p>
           </div>
-          <button
-            onClick={fetchDashboard}
-            disabled={loading}
-            className="flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition font-medium disabled:opacity-50"
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
-            Atualizar
-          </button>
-        </div>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={handleUpdatePrices}
+              disabled={updating || loading}
+              className="flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw
+                className={`w-5 h-5 ${updating ? "animate-spin" : ""}`}
+              />
+              {updating ? "Atualizando..." : "Atualizar Cotações"}
+            </button>
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-500 bg-opacity-10 border border-red-500 text-red-500 px-4 py-3 rounded-lg mb-6">
-            {error}
+            {/* Update status message */}
+            {updateMessage && (
+              <div
+                className={`flex items-center gap-2 text-sm px-4 py-2 rounded-lg ${
+                  updateMessage.type === "success"
+                    ? "bg-green-500 bg-opacity-10 text-green-500 border border-green-500"
+                    : "bg-red-500 bg-opacity-10 text-red-500 border border-red-500"
+                }`}
+              >
+                {updateMessage.type === "success" ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <AlertCircle className="w-4 h-4" />
+                )}
+                {updateMessage.text}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Valor Investido */}
           <div className="bg-[#141b2d] border border-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-start mb-4">
               <p className="text-gray-400 text-sm">Valor Investido</p>
@@ -167,7 +210,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Valor Atual */}
           <div className="bg-[#141b2d] border border-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-start mb-4">
               <p className="text-gray-400 text-sm">Valor Atual</p>
@@ -184,7 +226,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Rentabilidade */}
           <div className="bg-[#141b2d] border border-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-start mb-4">
               <p className="text-gray-400 text-sm">Rentabilidade Total</p>
@@ -212,7 +253,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Dividendos */}
           <div className="bg-[#141b2d] border border-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-start mb-4">
               <p className="text-gray-400 text-sm">Dividendos Recebidos</p>
@@ -230,9 +270,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Portfolio Table + Charts */}
+        {/* Portfolio + Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Portfolio Assets */}
+          {/* Portfolio list */}
           <div className="bg-[#141b2d] border border-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-white">
@@ -307,7 +347,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* Charts placeholder */}
+          {/* Distribution by type */}
           <div className="bg-[#141b2d] border border-gray-800 rounded-xl p-6">
             <h3 className="text-xl font-semibold text-white mb-6">
               Distribuição por Tipo
@@ -340,7 +380,6 @@ export default function Home() {
                     REIT: "REITs",
                     ETF: "ETFs",
                   };
-
                   return (
                     <div key={type}>
                       <div className="flex justify-between text-sm mb-1">
