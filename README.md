@@ -16,7 +16,7 @@ Antes de começar, certifique-se de ter instalado:
 
 Extraia todos os arquivos para uma pasta, por exemplo:
 ```
-C:\Users\Fernando\carteira-b3-clean\
+C:\Users\UserName\carteira-b3\
 ```
 
 ### 2. Configurar o Banco de Dados
