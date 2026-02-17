@@ -1,9 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { TrendingUp, DollarSign, PieChart, Calendar, Plus, Edit, Trash2 } from 'lucide-react';
-import AddAssetModal from '@/components/AddAssetModal';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  TrendingUp,
+  DollarSign,
+  PieChart,
+  Calendar,
+  Plus,
+  Edit,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import AddAssetModal from "@/components/AddAssetModal";
+import ImportB3Modal from "@/components/ImportB3Modal";
 
 interface Asset {
   id: number;
@@ -20,15 +30,16 @@ export default function AtivosPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const fetchAssets = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/assets?userId=1'); // TODO: Replace with actual user ID
+      const response = await fetch("/api/assets?userId=1"); // TODO: Replace with actual user ID
       const data = await response.json();
       setAssets(data.assets);
     } catch (error) {
-      console.error('Error fetching assets:', error);
+      console.error("Error fetching assets:", error);
     } finally {
       setLoading(false);
     }
@@ -43,14 +54,14 @@ export default function AtivosPage() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
   const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
+    return new Intl.NumberFormat("pt-BR", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 4,
     }).format(value);
@@ -58,11 +69,11 @@ export default function AtivosPage() {
 
   const getTypeLabel = (type: string) => {
     const types: { [key: string]: string } = {
-      ACAO: 'Ação',
-      FII: 'FII',
-      STOCK: 'Stock',
-      REIT: 'REIT',
-      ETF: 'ETF',
+      ACAO: "Ação",
+      FII: "FII",
+      STOCK: "Stock",
+      REIT: "REIT",
+      ETF: "ETF",
     };
     return types[type] || type;
   };
@@ -81,19 +92,31 @@ export default function AtivosPage() {
             </div>
 
             <nav className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-lg hover:text-white hover:bg-gray-800 transition">
+              <Link
+                href="/"
+                className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-lg hover:text-white hover:bg-gray-800 transition"
+              >
                 <PieChart className="w-4 h-4" />
                 Dashboard
               </Link>
-              <Link href="/ativos" className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+              <Link
+                href="/ativos"
+                className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+              >
                 <DollarSign className="w-4 h-4" />
                 Ativos
               </Link>
-              <Link href="/transacoes" className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-lg hover:text-white hover:bg-gray-800 transition">
+              <Link
+                href="/transacoes"
+                className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-lg hover:text-white hover:bg-gray-800 transition"
+              >
                 <Calendar className="w-4 h-4" />
                 Transações
               </Link>
-              <Link href="/dividendos" className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-lg hover:text-white hover:bg-gray-800 transition">
+              <Link
+                href="/dividendos"
+                className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-lg hover:text-white hover:bg-gray-800 transition"
+              >
                 <DollarSign className="w-4 h-4" />
                 Dividendos
               </Link>
@@ -118,45 +141,84 @@ export default function AtivosPage() {
           </button>
         </div>
 
+        <div>
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition font-medium"
+          >
+            <Upload className="w-5 h-5" />
+            Importar B3
+          </button>
+        </div>
         {/* Assets Table */}
         <div className="bg-[#141b2d] border border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-[#0f1729]">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Ticker</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Nome</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Tipo</th>
-                <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">Quantidade</th>
-                <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">Preço Médio</th>
-                <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">Total Investido</th>
-                <th className="px-6 py-4 text-center text-sm font-medium text-gray-400">Ações</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">
+                  Ticker
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">
+                  Nome
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">
+                  Tipo
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">
+                  Quantidade
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">
+                  Preço Médio
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">
+                  Total Investido
+                </th>
+                <th className="px-6 py-4 text-center text-sm font-medium text-gray-400">
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  <td
+                    colSpan={7}
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
                     Carregando...
                   </td>
                 </tr>
               ) : assets.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    Nenhum ativo cadastrado. Clique em "Adicionar Ativo" para começar.
+                  <td
+                    colSpan={7}
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
+                    Nenhum ativo cadastrado. Clique em "Adicionar Ativo" para
+                    começar.
                   </td>
                 </tr>
               ) : (
                 assets.map((asset) => (
-                  <tr key={asset.id} className="border-t border-gray-800 hover:bg-[#0f1729] transition">
-                    <td className="px-6 py-4 text-white font-medium">{asset.ticker}</td>
+                  <tr
+                    key={asset.id}
+                    className="border-t border-gray-800 hover:bg-[#0f1729] transition"
+                  >
+                    <td className="px-6 py-4 text-white font-medium">
+                      {asset.ticker}
+                    </td>
                     <td className="px-6 py-4 text-gray-300">{asset.name}</td>
                     <td className="px-6 py-4">
                       <span className="px-3 py-1 bg-green-500 bg-opacity-10 text-green-500 rounded-full text-sm">
                         {getTypeLabel(asset.type)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right text-white">{formatNumber(asset.quantity)}</td>
-                    <td className="px-6 py-4 text-right text-white">{formatCurrency(asset.averagePrice)}</td>
+                    <td className="px-6 py-4 text-right text-white">
+                      {formatNumber(asset.quantity)}
+                    </td>
+                    <td className="px-6 py-4 text-right text-white">
+                      {formatCurrency(asset.averagePrice)}
+                    </td>
                     <td className="px-6 py-4 text-right text-white font-medium">
                       {formatCurrency(asset.quantity * asset.averagePrice)}
                     </td>
@@ -186,26 +248,41 @@ export default function AtivosPage() {
                 <p className="text-2xl font-bold text-white">{assets.length}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-400 mb-1">Valor Total Investido</p>
+                <p className="text-sm text-gray-400 mb-1">
+                  Valor Total Investido
+                </p>
                 <p className="text-2xl font-bold text-white">
                   {formatCurrency(
-                    assets.reduce((sum, asset) => sum + (asset.quantity * asset.averagePrice), 0)
+                    assets.reduce(
+                      (sum, asset) => sum + asset.quantity * asset.averagePrice,
+                      0,
+                    ),
                   )}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-400 mb-1">Maior Posição</p>
                 <p className="text-2xl font-bold text-white">
-                  {assets.length > 0 ? assets.reduce((max, asset) => {
-                    const value = asset.quantity * asset.averagePrice;
-                    return value > (max.quantity * max.averagePrice) ? asset : max;
-                  }).ticker : '-'}
+                  {assets.length > 0
+                    ? assets.reduce((max, asset) => {
+                        const value = asset.quantity * asset.averagePrice;
+                        return value > max.quantity * max.averagePrice
+                          ? asset
+                          : max;
+                      }).ticker
+                    : "-"}
                 </p>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      <ImportB3Modal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={fetchAssets}
+      />
 
       {/* Add Asset Modal */}
       <AddAssetModal
