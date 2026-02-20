@@ -36,10 +36,17 @@ export default function AtivosPage() {
     try {
       setLoading(true);
       const response = await fetch("/api/assets"); // TODO: Replace with actual user ID
+
       const data = await response.json();
-      setAssets(data.assets);
+
+      if (response.ok && data.assets) {
+        setAssets(data.assets);
+      } else {
+        setAssets([]);
+      }
     } catch (error) {
       console.error("Error fetching assets:", error);
+      setAssets([]); // ← Important!
     } finally {
       setLoading(false);
     }
