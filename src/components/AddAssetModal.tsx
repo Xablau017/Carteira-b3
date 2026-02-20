@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Modal from './Modal';
+import { useState } from "react";
+import Modal from "./Modal";
 
 interface AddAssetModalProps {
   isOpen: boolean;
@@ -9,71 +9,78 @@ interface AddAssetModalProps {
   onSuccess: () => void;
 }
 
-export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetModalProps) {
+export default function AddAssetModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: AddAssetModalProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   const [formData, setFormData] = useState({
-    ticker: '',
-    name: '',
-    type: 'ACAO',
-    quantity: '',
-    averagePrice: '',
-    currentPrice: '',
-    sector: '',
+    ticker: "",
+    name: "",
+    type: "ACAO",
+    quantity: "",
+    averagePrice: "",
+    currentPrice: "",
+    sector: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/assets', {
-        method: 'POST',
+      const response = await fetch("/api/assets", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: 1, // TODO: Replace with actual user ID from authentication
           ticker: formData.ticker.toUpperCase(),
           name: formData.name,
           type: formData.type,
           quantity: parseFloat(formData.quantity),
           averagePrice: parseFloat(formData.averagePrice),
-          currentPrice: formData.currentPrice ? parseFloat(formData.currentPrice) : null,
+          currentPrice: formData.currentPrice
+            ? parseFloat(formData.currentPrice)
+            : null,
           sector: formData.sector || null,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao adicionar ativo');
+        throw new Error("Erro ao adicionar ativo");
       }
 
       // Reset form
       setFormData({
-        ticker: '',
-        name: '',
-        type: 'ACAO',
-        quantity: '',
-        averagePrice: '',
-        currentPrice: '',
-        sector: '',
+        ticker: "",
+        name: "",
+        type: "ACAO",
+        quantity: "",
+        averagePrice: "",
+        currentPrice: "",
+        sector: "",
       });
-      
+
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -221,7 +228,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
             disabled={loading}
             className="flex-1 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Adicionando...' : 'Adicionar'}
+            {loading ? "Adicionando..." : "Adicionar"}
           </button>
         </div>
       </form>

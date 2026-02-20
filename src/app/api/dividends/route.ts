@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-// GET - fetch all dividends grouped by month
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = parseInt(searchParams.get("userId") || "1");
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = parseInt(session.user.id);
 
     const dividends = await prisma.dividend.findMany({
       where: { userId },
@@ -26,7 +32,6 @@ export async function GET(request: NextRequest) {
       monthlyMap.set(key, (monthlyMap.get(key) || 0) + Number(div.value));
     }
 
-    // Build monthly chart data sorted by date
     const monthly = Array.from(monthlyMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([month, total]) => {
@@ -81,13 +86,20 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - manually add a dividend
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { userId, assetId, type, value, date, notes } = body;
+    const session = await getServerSession(authOptions);
 
-    if (!userId || !assetId || !type || !value || !date) {
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = parseInt(session.user.id);
+    const body = await request.json();
+
+    const { assetId, type, value, date, notes } = body;
+
+    if (!assetId || !type || !value || !date) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -96,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     const dividend = await prisma.dividend.create({
       data: {
-        userId: parseInt(userId),
+        userId,
         assetId: parseInt(assetId),
         type,
         value: parseFloat(value),

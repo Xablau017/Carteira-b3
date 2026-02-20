@@ -27,7 +27,7 @@ interface Asset {
 }
 
 export default function AtivosPage() {
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] = useState<Asset>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -35,7 +35,8 @@ export default function AtivosPage() {
   const fetchAssets = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/assets");
+      const response = await fetch("/api/assets"); // TODO: Replace with actual user ID
+
       const data = await response.json();
 
       if (response.ok && data.assets) {
