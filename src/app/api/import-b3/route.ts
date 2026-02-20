@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import * as XLSX from "xlsx";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // Helper: extract clean name from "TICKER - FULL NAME    " format
 function parseName(produto: string): { ticker: string; name: string } {
@@ -107,8 +109,13 @@ interface ParsedAsset {
 
 export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = parseInt(searchParams.get("userId") || "1");
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = parseInt(session.user.id);
 
     // Parse multipart form data
     const formData = await request.formData();

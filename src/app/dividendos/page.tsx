@@ -73,7 +73,7 @@ export default function DividendosPage() {
   const fetchDividends = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/dividends?userId=1");
+      const response = await fetch("/api/dividends");
       const result = await response.json();
       if (result.success) setData(result.data);
     } catch (err) {

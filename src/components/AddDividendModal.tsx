@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Modal from './Modal';
+import { useState, useEffect } from "react";
+import Modal from "./Modal";
 
 interface Asset {
   id: number;
@@ -15,38 +15,41 @@ interface AddDividendModalProps {
   onSuccess: () => void;
 }
 
-export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDividendModalProps) {
+export default function AddDividendModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: AddDividendModalProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    assetId: '',
-    type: 'DIVIDENDO',
-    value: '',
-    date: new Date().toISOString().split('T')[0],
-    notes: '',
+    assetId: "",
+    type: "DIVIDENDO",
+    value: "",
+    date: new Date().toISOString().split("T")[0],
+    notes: "",
   });
 
   useEffect(() => {
     if (isOpen) {
-      fetch('/api/assets?userId=1')
-        .then(r => r.json())
-        .then(data => setAssets(data.assets || []));
+      fetch("/api/assets?")
+        .then((r) => r.json())
+        .then((data) => setAssets(data.assets || []));
     }
   }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/dividends', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/dividends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: 1,
           assetId: formData.assetId,
           type: formData.type,
           value: formData.value,
@@ -55,27 +58,31 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
         }),
       });
 
-      if (!response.ok) throw new Error('Erro ao adicionar dividendo');
+      if (!response.ok) throw new Error("Erro ao adicionar dividendo");
 
       setFormData({
-        assetId: '',
-        type: 'DIVIDENDO',
-        value: '',
-        date: new Date().toISOString().split('T')[0],
-        notes: '',
+        assetId: "",
+        type: "DIVIDENDO",
+        value: "",
+        date: new Date().toISOString().split("T")[0],
+        notes: "",
       });
 
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   return (
@@ -89,7 +96,9 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
 
         {/* Asset */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Ativo *</label>
+          <label className="block text-sm font-medium text-gray-400 mb-2">
+            Ativo *
+          </label>
           <select
             name="assetId"
             value={formData.assetId}
@@ -98,7 +107,7 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
             className="w-full bg-[#0f1729] border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500 transition"
           >
             <option value="">Selecione um ativo...</option>
-            {assets.map(asset => (
+            {assets.map((asset) => (
               <option key={asset.id} value={asset.id}>
                 {asset.ticker} - {asset.name}
               </option>
@@ -108,7 +117,9 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
 
         {/* Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Tipo *</label>
+          <label className="block text-sm font-medium text-gray-400 mb-2">
+            Tipo *
+          </label>
           <select
             name="type"
             value={formData.type}
@@ -124,7 +135,9 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
         {/* Value and Date side by side */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Valor Total (R$) *</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Valor Total (R$) *
+            </label>
             <input
               type="number"
               name="value"
@@ -139,7 +152,9 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Data de Pagamento *</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Data de Pagamento *
+            </label>
             <input
               type="date"
               name="date"
@@ -153,7 +168,9 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Observações - Opcional</label>
+          <label className="block text-sm font-medium text-gray-400 mb-2">
+            Observações - Opcional
+          </label>
           <textarea
             name="notes"
             value={formData.notes}
@@ -178,7 +195,7 @@ export default function AddDividendModal({ isOpen, onClose, onSuccess }: AddDivi
             disabled={loading}
             className="flex-1 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium disabled:opacity-50"
           >
-            {loading ? 'Salvando...' : 'Salvar'}
+            {loading ? "Salvando..." : "Salvar"}
           </button>
         </div>
       </form>
