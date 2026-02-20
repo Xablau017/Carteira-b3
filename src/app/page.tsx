@@ -47,7 +47,7 @@ export default function Home() {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/dashboard?userId=1");
+      const response = await fetch("/api/dashboard");
       const result = await response.json();
       if (result.success) setData(result.data);
     } catch (err) {
@@ -62,7 +62,7 @@ export default function Home() {
       setUpdating(true);
       setUpdateMessage(null);
 
-      const response = await fetch("/api/update-prices?userId=1", {
+      const response = await fetch("/api/update-prices", {
         method: "POST",
       });
 
