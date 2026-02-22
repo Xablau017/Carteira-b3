@@ -27,7 +27,7 @@ interface Asset {
 }
 
 export default function AtivosPage() {
-  const [assets, setAssets] = useState<Asset>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);

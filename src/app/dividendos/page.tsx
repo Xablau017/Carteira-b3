@@ -291,7 +291,9 @@ export default function DividendosPage() {
                 <Bar
                   dataKey="total"
                   radius={[6, 6, 0, 0]}
-                  onMouseEnter={(data) => setActiveBar(data.month)}
+                  onMouseEnter={(data: any) =>
+                    setActiveBar(data.payload?.month)
+                  }
                   onMouseLeave={() => setActiveBar(null)}
                 >
                   {data.monthly.map((entry) => (
