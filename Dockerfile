@@ -28,6 +28,13 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+
 # Set to production
 ENV NODE_ENV=production
 
@@ -40,6 +47,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/middleware.ts ./middleware.ts
 
 # Set permissions
 RUN chown -R nextjs:nodejs /app
