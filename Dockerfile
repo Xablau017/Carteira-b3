@@ -47,8 +47,6 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/middleware.ts ./middleware.ts
-
 # Set permissions
 RUN chown -R nextjs:nodejs /app
 
